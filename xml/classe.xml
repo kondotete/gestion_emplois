@@ -1,0 +1,16 @@
+/**
+ * Represents a class with a specific field and level, containing students and modules.
+ * 
+ * @param filiere The academic track or specialization of the class (e.g., "AL")
+ * @param niveau The academic level of the class (e.g., "3")
+ * @element etudiants A collection of students enrolled in the class
+ * @element modules A collection of modules/courses associated with the class
+ */
+<classe filiere="AL" niveau="3">
+    <etudiants>
+        <etudiant numInscription="E200" nom="GASTON" prenom="Yves"/>
+    </etudiants>
+    <modules>
+        <module idModule="M1" nomModule="JavaEE"/>
+    </modules>
+</classe>
