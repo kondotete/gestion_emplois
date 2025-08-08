@@ -1,18 +1,36 @@
 <?php
+$output = '';
+$error = '';
+
 if (isset($_GET['classe'])) {
     $classeID = htmlspecialchars($_GET['classe']);
-    $xmlUrl = "http://localhost/emploi-du-temps/php/classes.php?classe=" . $classeID;
-
-    $xml = new DOMDocument;
-    $xml->load($xmlUrl);
-
-    $xsl = new DOMDocument;
-    $xsl->load("http://localhost/emploi-du-temps/xsl/classe.xsl");
-
-    $proc = new XSLTProcessor();
-    $proc->importStylesheet($xsl);
-
-    $output = $proc->transformToXML($xml);
+    
+    // Correction des chemins - adapter selon votre structure
+    $xmlUrl = "http://localhost/gestion/gestion_emplois-IA/php/classes.php?classe=" . $classeID;
+    $xslPath = __DIR__ . "/xsl/classe.xsl"; // Chemin local vers le fichier XSL
+    
+    try {
+        // Chargement du XML depuis l'URL
+        $xml = new DOMDocument();
+        $xml->load($xmlUrl);
+        
+        // Vérification si le fichier XSL existe localement
+        if (!file_exists($xslPath)) {
+            throw new Exception("Fichier XSL introuvable : " . $xslPath);
+        }
+        
+        // Chargement du XSL depuis le fichier local
+        $xsl = new DOMDocument();
+        $xsl->load($xslPath);
+        
+        // Traitement XSLT
+        $proc = new XSLTProcessor();
+        $proc->importStylesheet($xsl);
+        $output = $proc->transformToXML($xml);
+        
+    } catch (Exception $e) {
+        $error = "Erreur lors du traitement : " . $e->getMessage();
+    }
 }
 ?>
 
@@ -31,14 +49,25 @@ if (isset($_GET['classe'])) {
         <form method="GET" class="mb-8">
             <label for="classe" class="block mb-2 font-semibold">Choisissez une classe :</label>
             <select name="classe" id="classe" class="p-2 border rounded shadow">
-            <option value="1">AL3</option>
-            <option value="2">SRS3</option>
-            <option value="3">IA-BD3</option>
+                <option value="">Sélectionnez une classe</option>
+                <option value="1" <?= isset($_GET['classe']) && $_GET['classe'] == '1' ? 'selected' : '' ?>>AL3</option>
+                <option value="2" <?= isset($_GET['classe']) && $_GET['classe'] == '2' ? 'selected' : '' ?>>SRS3</option>
+                <option value="3" <?= isset($_GET['classe']) && $_GET['classe'] == '3' ? 'selected' : '' ?>>IA-BD3</option>
             </select>
-            <button type="submit" class="ml-4 px-4 py-2 bg-green-500 text-white rounded shadow">Afficher</button>
+            <button type="submit" class="ml-4 px-4 py-2 bg-green-500 text-white rounded shadow hover:bg-green-600">Afficher</button>
         </form>
 
-        <?php if (isset($output)) echo $output; ?>
+        <?php if ($error): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <strong>Erreur :</strong> <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($output): ?>
+            <div class="mt-6">
+                <?= $output ?>
+            </div>
+        <?php endif; ?>
     </div>
 
 </body>
